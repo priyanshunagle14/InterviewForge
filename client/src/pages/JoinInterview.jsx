@@ -44,7 +44,7 @@ export default function JoinInterview() {
 
         try {
             const res = await fetch(
-                `http://localhost:4000/api/rooms/${interviewId.trim()}`
+                `${API_URL}/api/rooms/${interviewId.trim()}`
             );
 
             if (!res.ok) {
