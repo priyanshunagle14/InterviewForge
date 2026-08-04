@@ -1,3 +1,4 @@
+import api from "../../services/api";
 import { useState } from "react";
 import { useToast } from "../../context/ToastContext";
 
@@ -13,15 +14,8 @@ export default function ConsolePanel({ code, language }) {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:4000/api/execute", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, language }),
-      });
-
-      if (!res.ok) { setError("Execution failed."); setRunning(false); return; }
-      const data = await res.json();
-      setOutput(data);
+      const res = await api.post("/api/execute", { code, language });
+      setOutput(res.data);
     } catch {
       setError("Could not reach the server.");
       showToast("Could not reach the server", "error");

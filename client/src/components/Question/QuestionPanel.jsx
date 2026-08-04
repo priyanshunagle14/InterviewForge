@@ -1,3 +1,4 @@
+import api from "../../services/api";
 import { useEffect, useState } from "react";
 import Card from "../Common/Card";
 import Badge from "../Common/Badge";
@@ -12,9 +13,8 @@ export default function QuestionPanel({ role, question, onSelectQuestion, onCrea
   const [starterCode, setStarterCode] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:4000/api/questions")
-      .then((res) => res.json())
-      .then(setAvailableQuestions)
+    api.get("/api/questions")
+      .then((res) => setAvailableQuestions(res.data))
       .catch(() => setAvailableQuestions([]));
   }, []);
 
