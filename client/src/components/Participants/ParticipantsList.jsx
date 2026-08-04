@@ -2,7 +2,6 @@ import Card from "../Common/Card";
 import Badge from "../Common/Badge";
 
 export default function ParticipantsList({ participants, mySocketId, role, onRemove }) {
-  console.log(participants);
   return (
     <Card className="p-6">
       <h3 className="font-mono text-xs text-dim tracking-wide mb-4">PARTICIPANTS</h3>
