@@ -4,6 +4,7 @@ import Button from "../components/Common/Button";
 import Card from "../components/Common/Card";
 import BackButton from "../components/Common/BackButton";
 import { useAuth } from "../context/AuthContext";
+import { API_URL } from "../config";
 
 export default function JoinInterview() {
     const [interviewId, setInterviewId] = useState("");
