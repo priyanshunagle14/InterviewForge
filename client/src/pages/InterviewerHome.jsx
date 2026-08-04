@@ -1,3 +1,4 @@
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Common/Button";
@@ -18,7 +19,7 @@ export default function InterviewerHome() {
         setLoading(true);
 
         try {
-            const res = await fetch("http://localhost:4000/api/rooms", {
+            const res = await fetch(`${API_URL}/api/rooms`, {
                 method: "POST",
                 headers: { Authorization: `Bearer ${token}` },
             });

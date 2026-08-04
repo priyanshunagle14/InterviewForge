@@ -1,3 +1,4 @@
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
@@ -23,7 +24,7 @@ export default function CandidateDashboard() {
             return;
         }
 
-        fetch("http://localhost:4000/api/dashboard/candidate", {
+        fetch(`${API_URL}/api/dashboard/candidate`, {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then((res) => {
