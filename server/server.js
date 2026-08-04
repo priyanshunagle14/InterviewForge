@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://interview-forge-delta.vercel.app/",
+      "https://interview-forge-delta.vercel.app",
     ],
     credentials: true,
   })
@@ -35,7 +35,7 @@ const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:5173",
-      "https://interview-forge-delta.vercel.app/",
+      "https://interview-forge-delta.vercel.app",
     ],
     methods: ["GET", "POST"],
     credentials: true,

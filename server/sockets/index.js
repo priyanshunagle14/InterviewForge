@@ -9,6 +9,23 @@ const LANGUAGE_STARTERS = {
 };
 
 function registerSocketHandlers(io, socket) {
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "https://interview-forge-delta.vercel.app"
+  ];
+
+  const io = new Server(server, {
+    cors: {
+      origin: allowedOrigins,
+      methods: ["GET", "POST"],
+      credentials: true
+    }
+  });
+
+  app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+  }));
 
   socket.on("join-room", async ({ roomId, role, name, userId }) => {
     const room = getRoom(roomId);
