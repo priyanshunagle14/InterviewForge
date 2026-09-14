@@ -19,7 +19,8 @@ async function createRoomHandler(req, res) {
 function getRoomHandler(req, res) {
   const room = getRoom(req.params.id);
   if (!room) return res.status(404).json({ error: "Room not found" });
-  res.json({ roomId: req.params.id, exists: true });
+  res.json({ roomId: room.roomId || req.params.id, exists: true });
 }
+
 
 module.exports = { createRoomHandler, getRoomHandler };

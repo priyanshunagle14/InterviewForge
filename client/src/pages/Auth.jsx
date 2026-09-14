@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Button from "../components/Common/Button";
 import Card from "../components/Common/Card";
+import Input from "../components/Common/Input";
 import BackButton from "../components/Common/BackButton";
 import { useAuth } from "../context/AuthContext";
 import { API_URL } from "../config";
@@ -20,6 +21,7 @@ export default function Auth() {
     const [password, setPassword] = useState("");
 
     const [error, setError] = useState("");
+    const [fieldErrors, setFieldErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -35,15 +37,33 @@ export default function Auth() {
         }
     }, [searchParams]);
 
+    const validateForm = () => {
+        const errors = {};
+
+        if (mode === "signup" && !name.trim()) {
+            errors.name = "Full name is required";
+        }
+
+        if (!email.trim()) {
+            errors.email = "Email is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.email = "Please enter a valid email address";
+        }
+
+        if (!password.trim()) {
+            errors.password = "Password is required";
+        } else if (mode === "signup" && password.length < 8) {
+            errors.password = "Password must be at least 8 characters";
+        }
+
+        setFieldErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
     async function handleSubmit() {
         setError("");
 
-        if (
-            !email.trim() ||
-            !password.trim() ||
-            (mode === "signup" && !name.trim())
-        ) {
-            setError("Please fill in all fields.");
+        if (!validateForm()) {
             return;
         }
 
@@ -89,134 +109,155 @@ export default function Auth() {
 
             login(data.user, data.token);
 
-            // If the user was forced to login from an interview invite,
-            // send them back there.
             const redirect = searchParams.get("redirect");
 
             if (redirect) {
                 navigate(redirect, { replace: true });
             } else {
-                // Otherwise always go Home.
-                navigate("/", { replace: true });
+                navigate(data.user.role === "candidate" ? "/candidate-dashboard" : "/dashboard", { replace: true });
             }
         } catch {
-            setError("Could not connect to the server.");
+            setError("Could not connect to the server. Please try again.");
         }
 
         setLoading(false);
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-5 bg-gradient-landing">
-            <Card className="w-full max-w-md p-8">
-                <BackButton />
-
-                <div className="mb-8">
-                    <span className="font-mono text-sm text-dim">
-                        InterviewForge
-                    </span>
-
-                    <h1 className="text-3xl mt-2">
-                        {mode === "login"
-                            ? "Welcome back"
-                            : "Create your account"}
-                    </h1>
-
-                    <p className="text-dim text-sm mt-2">
-                        {mode === "login"
-                            ? "Sign in to continue your interviews."
-                            : "Create an account to manage your interviews."}
-                    </p>
-                </div>
-
-                <div className="space-y-4">
-
-                    {mode === "signup" && (
-                        <>
-                            <input
-                                type="text"
-                                placeholder="Full Name"
-                                value={name}
-                                onChange={(e) =>
-                                    setName(e.target.value)
-                                }
-                                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-white placeholder:text-dim outline-none focus:border-interviewer transition"
-                            />
-
-                            <select
-                                value={role}
-                                onChange={(e) =>
-                                    setRole(e.target.value)
-                                }
-                                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-white outline-none focus:border-interviewer transition"
-                            >
-                                <option value="interviewer">
-                                    Interviewer
-                                </option>
-
-                                <option value="candidate">
-                                    Candidate
-                                </option>
-                            </select>
-                        </>
-                    )}
-
-                    <input
-                        type="email"
-                        placeholder="Email address"
-                        value={email}
-                        onChange={(e) =>
-                            setEmail(e.target.value)
-                        }
-                        className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-white placeholder:text-dim outline-none focus:border-interviewer transition"
-                    />
-
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) =>
-                            setPassword(e.target.value)
-                        }
-                        onKeyDown={(e) =>
-                            e.key === "Enter" && handleSubmit()
-                        }
-                        className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-white placeholder:text-dim outline-none focus:border-interviewer transition"
-                    />
-
-                    {error && (
-                        <div className="text-red-400 text-sm">
-                            {error}
+        <div className="min-h-screen bg-bg bg-gradient-landing flex items-center justify-center p-4 sm:p-6">
+            <div className="w-full max-w-md animate-fade-in">
+                <div className="mb-6 flex items-center justify-between">
+                    <BackButton />
+                    <div className="flex items-center gap-2">
+                        <div className="h-7 w-7 rounded-lg bg-surface-raised border border-border flex items-center justify-center font-bold text-xs text-candidate">
+                            IF
                         </div>
-                    )}
-
-                    <Button
-                        onClick={handleSubmit}
-                        disabled={loading}
-                    >
-                        {loading
-                            ? "Please wait..."
-                            : mode === "login"
-                                ? "Log In"
-                                : "Create Account"}
-                    </Button>
-
-                    <button
-                        onClick={() =>
-                            setMode(
-                                mode === "login"
-                                    ? "signup"
-                                    : "login"
-                            )
-                        }
-                        className="w-full text-center text-sm text-dim hover:text-white transition"
-                    >
-                        {mode === "login"
-                            ? "Don't have an account? Sign up"
-                            : "Already have an account? Log in"}
-                    </button>
+                        <span className="font-bold text-sm text-white tracking-tight">InterviewForge</span>
+                    </div>
                 </div>
-            </Card>
+
+                <Card className="p-6 sm:p-8">
+                    {/* Segmented Auth Mode Switcher */}
+                    <div className="grid grid-cols-2 p-1 bg-surface-subtle border border-border/80 rounded-xl mb-6 text-xs font-medium">
+                        <button
+                            type="button"
+                            onClick={() => { setMode("login"); setError(""); setFieldErrors({}); }}
+                            className={`py-2 rounded-lg transition-all cursor-pointer ${
+                                mode === "login"
+                                    ? "bg-surface-raised text-white shadow-sm font-semibold border border-border/60"
+                                    : "text-dim hover:text-white"
+                            }`}
+                        >
+                            Sign In
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { setMode("signup"); setError(""); setFieldErrors({}); }}
+                            className={`py-2 rounded-lg transition-all cursor-pointer ${
+                                mode === "signup"
+                                    ? "bg-surface-raised text-white shadow-sm font-semibold border border-border/60"
+                                    : "text-dim hover:text-white"
+                            }`}
+                        >
+                            Create Account
+                        </button>
+                    </div>
+
+                    <div className="mb-6">
+                        <h1 className="text-2xl font-bold text-white tracking-tight mb-1">
+                            {mode === "login" ? "Welcome back" : "Get started with InterviewForge"}
+                        </h1>
+                        <p className="text-dim text-xs leading-relaxed">
+                            {mode === "login"
+                                ? "Sign in to access your technical interview workspace."
+                                : "Conduct live coding interviews & candidate evaluations seamlessly."}
+                        </p>
+                    </div>
+
+                    <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+                        {mode === "signup" && (
+                            <>
+                                <Input
+                                    label="Full Name"
+                                    type="text"
+                                    placeholder="e.g. Alex Morgan"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    error={fieldErrors.name}
+                                    required
+                                />
+
+                                <div>
+                                    <label className="block text-xs font-medium text-dim uppercase tracking-wider mb-1.5">
+                                        Account Role
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setRole("interviewer")}
+                                            className={`p-3 rounded-lg border text-left transition-all cursor-pointer ${
+                                                role === "interviewer"
+                                                    ? "bg-interviewer/10 border-interviewer/50 text-interviewer font-semibold"
+                                                    : "bg-surface-subtle border-border/80 text-dim hover:text-white"
+                                            }`}
+                                        >
+                                            <div className="text-xs">Interviewer</div>
+                                            <div className="text-[10px] text-dim font-normal mt-0.5">Create & run rooms</div>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setRole("candidate")}
+                                            className={`p-3 rounded-lg border text-left transition-all cursor-pointer ${
+                                                role === "candidate"
+                                                    ? "bg-candidate/10 border-candidate/50 text-candidate font-semibold"
+                                                    : "bg-surface-subtle border-border/80 text-dim hover:text-white"
+                                            }`}
+                                        >
+                                            <div className="text-xs">Candidate</div>
+                                            <div className="text-[10px] text-dim font-normal mt-0.5">Join live coding</div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        <Input
+                            label="Email Address"
+                            type="email"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            error={fieldErrors.email}
+                            required
+                        />
+
+                        <Input
+                            label="Password"
+                            type="password"
+                            placeholder={mode === "signup" ? "At least 8 characters" : "••••••••"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            error={fieldErrors.password}
+                            required
+                        />
+
+                        {error && (
+                            <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg flex items-center gap-2.5 text-rose-400 text-xs font-medium">
+                                <span>⚠</span>
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        <Button
+                            type="submit"
+                            loading={loading}
+                            className="w-full mt-2"
+                        >
+                            {mode === "login" ? "Sign In" : "Create Account"}
+                        </Button>
+                    </form>
+                </Card>
+            </div>
         </div>
     );
-}
+}

@@ -1,52 +1,67 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
 import Button from "../components/Common/Button";
 import Card from "../components/Common/Card";
 import Badge from "../components/Common/Badge";
-
+import InteractiveDemo from "../components/Landing/InteractiveDemo";
 
 import { useAuth } from "../context/AuthContext";
 
-export default function Landing() {
+export default function LandingPage() {
     const navigate = useNavigate();
     const { user, isAuthenticated: isLoggedIn } = useAuth();
+    const [faqOpen, setFaqOpen] = useState(null);
 
     function getPrimaryAction() {
-        if (!isLoggedIn) return { label: "Start Interviewing", onClick: () => navigate("/auth?role=interviewer") };
-        if (user?.role === "interviewer") return { label: "New Interview", onClick: () => navigate("/interviewer") };
-        return { label: "Join Interview", onClick: () => navigate("/join") };
+        if (!isLoggedIn) return { label: "Start Interviewing Free", onClick: () => navigate("/auth?role=interviewer") };
+        if (user?.role === "interviewer") return { label: "+ New Interview Room", onClick: () => navigate("/interviewer") };
+        return { label: "Join Interview Session", onClick: () => navigate("/join") };
     }
 
     function getSecondaryAction() {
         if (!isLoggedIn) return { label: "Join as Candidate", onClick: () => navigate("/auth?role=candidate") };
-        return { label: "Go to Dashboard", onClick: () => navigate(user?.role === "interviewer" ? "/dashboard" : "/candidate-dashboard") };
+        return { label: "Open Dashboard", onClick: () => navigate(user?.role === "interviewer" ? "/dashboard" : "/candidate-dashboard") };
     }
 
     const primary = getPrimaryAction();
     const secondary = getSecondaryAction();
 
+    function toggleFaq(index) {
+        setFaqOpen(faqOpen === index ? null : index);
+    }
+
     return (
         <div className="min-h-screen bg-bg text-white font-sans selection:bg-candidate/30 selection:text-candidate relative overflow-hidden flex flex-col">
 
-            {/* Ambient Background Radial Lights */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-b from-candidate/10 via-interviewer/5 to-transparent blur-3xl pointer-events-none -z-10" />
+            {/* CYBERPUNK AMBIENT BACKGROUND LIGHTS & GRID PATTERN */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-candidate/10 via-interviewer/5 to-transparent blur-3xl pointer-events-none -z-10" />
+            <div
+                className="absolute inset-0 opacity-[0.04] pointer-events-none -z-10"
+                style={{
+                    backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
+                    backgroundSize: "24px 24px"
+                }}
+            />
 
             <Navbar />
 
-            <main className="max-w-5xl mx-auto px-5 py-12 flex-1 w-full flex flex-col justify-between">
+            <main className="max-w-6xl mx-auto px-5 py-12 flex-1 w-full flex flex-col justify-between space-y-24">
 
                 {/* HERO SECTION */}
-                <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-14 space-y-6 animate-fade-in">
+                <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8 animate-fade-in pt-4">
 
                     {/* Live Status Pill */}
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-raised border border-border text-xs font-mono text-dim">
-                        <span className="h-1.5 w-1.5 rounded-full bg-candidate animate-pulse" />
+                    <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-surface-raised/90 border border-border/80 text-xs font-mono text-dim shadow-xl backdrop-blur-md">
+                        <span className="h-2 w-2 rounded-full bg-candidate animate-pulse shadow-[0_0_8px_rgba(45,212,191,0.8)]" />
                         <span>Engineered for Technical Evaluations</span>
+                        <span className="text-dim/40">•</span>
+                        <span className="text-candidate font-semibold tracking-wide">v1.2 Studio Live</span>
                     </div>
 
                     {/* Main Headline */}
-                    <h1 className="text-4xl md:text-6xl font-mono font-bold tracking-tight text-white leading-[1.1]">
+                    <h1 className="text-4xl sm:text-6xl md:text-7xl font-mono font-bold tracking-tight text-white leading-[1.08]">
                         Run the interview. <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-interviewer via-amber-200 to-candidate">
                             Not the tab-switching.
@@ -54,28 +69,79 @@ export default function Landing() {
                     </h1>
 
                     {/* Subtext */}
-                    <p className="text-dim text-sm md:text-base max-w-lg leading-relaxed">
-                        One shared editor. Real-time code sync, granular roles, and session controls —
-                        built specifically for technical interviews, not generic pair programming.
+                    <p className="text-dim text-sm sm:text-base md:text-lg max-w-2xl leading-relaxed">
+                        One unified workspace. Real-time Monaco code sync, sandboxed multi-language execution, anti-cheat activity logs, and post-session AI scorecards.
                     </p>
 
                     {/* CTA Actions */}
-                    <div className="flex flex-wrap justify-center gap-3 pt-2">
-                        <Button onClick={primary.onClick}>{primary.label}</Button>
-                        <Button variant="secondary" onClick={secondary.onClick}>{secondary.label}</Button>
+                    <div className="flex flex-wrap justify-center gap-4 pt-2">
+                        <Button size="lg" onClick={primary.onClick} className="shadow-lg shadow-candidate/10">
+                            {primary.label}
+                        </Button>
+                        <Button variant="secondary" size="lg" onClick={secondary.onClick}>
+                            {secondary.label}
+                        </Button>
+                    </div>
+
+                    {/* PLATFORM STATS STRIP */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full pt-8 border-t border-border/40">
+                        <StatCard number="< 45ms" label="Real-time Cursor Sync" accent="candidate" />
+                        <StatCard number="4 Languages" label="JS, Python, C++, Java" accent="interviewer" />
+                        <StatCard number="100% Sandboxed" label="Zero-setup Execution" accent="candidate" />
+                        <StatCard number="Automated" label="Anti-Cheat & Scorecards" accent="interviewer" />
                     </div>
                 </div>
 
-                {/* IDE SIGNATURE DEMO */}
-                <div className="max-w-3xl mx-auto w-full">
-                    <CodeDemo />
+                {/* INTERACTIVE STUDIO DEMO SHOWCASE */}
+                <div className="w-full">
+                    <div className="text-center mb-6 space-y-1">
+                        <span className="font-mono text-[11px] text-dim/70 uppercase tracking-widest">INTERACTIVE ENVIRONMENT PREVIEW</span>
+                        <h3 className="text-xl font-mono font-bold text-white">Experience the Live Interview Room</h3>
+                    </div>
+                    <InteractiveDemo />
                 </div>
 
-                {/* Features section */}
-                <div id="features" className="py-20">
-                    <div className="text-center mb-6">
-                        <span className="font-mono text-xs text-candidate tracking-widest">BUILT FOR HIRING</span>
-                        <h2 className="text-3xl mt-2 mb-3">Everything you need in one room</h2>
+                {/* HOW IT WORKS SECTION */}
+                <div className="space-y-10">
+                    <div className="text-center space-y-2">
+                        <span className="font-mono text-xs text-candidate tracking-widest uppercase bg-candidate/10 border border-candidate/20 px-3 py-1 rounded-full">
+                            EFFORTLESS WORKFLOW
+                        </span>
+                        <h2 className="text-3xl font-mono font-bold text-white">How InterviewForge Works</h2>
+                        <p className="text-dim text-sm max-w-md mx-auto">
+                            From room setup to final hiring evaluation in 3 simple steps.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <StepCard
+                            step="01"
+                            title="Create & Configure Room"
+                            desc="Interviewer initializes a room, selects target language, seeds interview questions, and sets session countdown timer."
+                            tag="Interviewer Control"
+                        />
+                        <StepCard
+                            step="02"
+                            title="Candidate Log In & Join"
+                            desc="Candidates log in with their candidate account and enter the unique Room ID or click an invite link to enter the live room."
+                            tag="Secure Access"
+                        />
+                        <StepCard
+                            step="03"
+                            title="Collaborate & Score"
+                            desc="Write, run, and debug code together in real-time while monitoring live activity feed. Generate full scorecard upon completion."
+                            tag="Instant Scorecard"
+                        />
+                    </div>
+                </div>
+
+                {/* FEATURES GRID SECTION */}
+                <div id="features" className="space-y-10">
+                    <div className="text-center space-y-2">
+                        <span className="font-mono text-xs text-candidate tracking-widest uppercase bg-candidate/10 border border-candidate/20 px-3 py-1 rounded-full">
+                            BUILT FOR TECHNICAL HIRING
+                        </span>
+                        <h2 className="text-3xl font-mono font-bold text-white">Everything you need in one room</h2>
                         <p className="text-dim text-sm max-w-md mx-auto leading-relaxed">
                             No more screen sharing lag, no more copy-pasting code into Zoom.
                             InterviewForge gives both sides a real working environment.
@@ -85,40 +151,142 @@ export default function Landing() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <FeatureCard
                             icon="⚡"
-                            title="Shared IDE"
-                            desc="Both participants type in the same Monaco editor in real time — the same editor that powers VS Code."
+                            title="Shared Monaco IDE"
+                            desc="Both participants type in the exact Monaco editor that powers VS Code — complete with syntax highlighting and indentation."
                             accent="candidate"
                         />
                         <FeatureCard
                             icon="▶"
-                            title="Code Execution"
-                            desc="Run JavaScript, Python, C++, and Java instantly via a sandboxed execution engine. No setup required."
+                            title="Multi-Language Execution"
+                            desc="Run JavaScript, Python, C++, and Java code safely inside an isolated client-side execution sandbox."
                             accent="interviewer"
                         />
                         <FeatureCard
                             icon="🔒"
-                            title="Role Security"
-                            desc="Interviewers control the session — lock the editor, mute chat, remove participants, and end the interview."
+                            title="Session Security Controls"
+                            desc="Interviewers can lock editor input, mute chat, manage participant focus, and end sessions on demand."
                             accent="candidate"
                         />
                         <FeatureCard
                             icon="📋"
-                            title="Activity Logging"
-                            desc="Every tab switch, paste attempt, and copy action is logged live in the interviewer's activity feed."
+                            title="Live Anti-Cheat Logging"
+                            desc="Every tab switch, window blur, and external paste attempt is recorded in real time with timestamped flags."
                             accent="interviewer"
                         />
                         <FeatureCard
                             icon="⏱"
-                            title="Interview Timer"
-                            desc="Start, pause, extend, or stop a synced countdown that both sides see simultaneously."
+                            title="Synchronized Timer"
+                            desc="Start, pause, or extend a synced countdown timer that keeps candidate and interviewer on exact pace."
                             accent="candidate"
                         />
                         <FeatureCard
                             icon="📊"
-                            title="Post-Interview Scorecard"
-                            desc="Auto-generated scorecard with interviewer notes and a downloadable transcript after every session."
+                            title="Post-Interview Scorecards"
+                            desc="Auto-generated evaluation scorecard with interviewer notes, category performance bars, and exportable transcript."
                             accent="interviewer"
                         />
+                    </div>
+                </div>
+
+                {/* COMPARISON TABLE */}
+                <div className="space-y-8 p-8 bg-surface border border-border/80 rounded-2xl shadow-xl">
+                    <div className="text-center space-y-2">
+                        <span className="font-mono text-xs text-interviewer tracking-widest uppercase bg-interviewer/10 border border-interviewer/20 px-3 py-1 rounded-full">
+                            WHY INTERVIEWFORGE
+                        </span>
+                        <h2 className="text-2xl font-mono font-bold text-white">Traditional Setup vs InterviewForge</h2>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left font-mono text-xs border-collapse">
+                            <thead>
+                                <tr className="border-b border-border text-dim uppercase text-[10px] tracking-wider">
+                                    <th className="py-3 px-4">Feature</th>
+                                    <th className="py-3 px-4 text-dim/60">Zoom + Google Docs</th>
+                                    <th className="py-3 px-4 text-dim/60">Generic IDEs</th>
+                                    <th className="py-3 px-4 text-candidate font-bold bg-candidate/5 rounded-t">InterviewForge Studio</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border/40 text-dim">
+                                <tr>
+                                    <td className="py-3.5 px-4 font-semibold text-white">Real-Time Code Sync</td>
+                                    <td className="py-3.5 px-4 text-rose-400">❌ Text lag & plain text</td>
+                                    <td className="py-3.5 px-4 text-amber-400">⚠️ Laggy cursor sync</td>
+                                    <td className="py-3.5 px-4 text-candidate font-bold bg-candidate/5">✓ Monaco VS Code Engine</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3.5 px-4 font-semibold text-white">Code Execution Sandbox</td>
+                                    <td className="py-3.5 px-4 text-rose-400">❌ None</td>
+                                    <td className="py-3.5 px-4 text-amber-400">⚠️ External setup needed</td>
+                                    <td className="py-3.5 px-4 text-candidate font-bold bg-candidate/5">✓ 4 Sandboxed Languages</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3.5 px-4 font-semibold text-white">Anti-Cheat Activity Audit</td>
+                                    <td className="py-3.5 px-4 text-rose-400">❌ Blind to tab switching</td>
+                                    <td className="py-3.5 px-4 text-rose-400">❌ No paste auditing</td>
+                                    <td className="py-3.5 px-4 text-candidate font-bold bg-candidate/5">✓ Live Event Feed & Alerts</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3.5 px-4 font-semibold text-white">Structured Scorecards</td>
+                                    <td className="py-3.5 px-4 text-rose-400">❌ Manual notes in Slack</td>
+                                    <td className="py-3.5 px-4 text-rose-400">❌ Manual entry</td>
+                                    <td className="py-3.5 px-4 text-candidate font-bold bg-candidate/5 rounded-b">✓ Auto-Generated Summary</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* FAQ ACCORDION SECTION */}
+                <div className="space-y-8 max-w-3xl mx-auto w-full">
+                    <div className="text-center space-y-2">
+                        <span className="font-mono text-xs text-candidate tracking-widest uppercase">GOT QUESTIONS?</span>
+                        <h2 className="text-3xl font-mono font-bold text-white">Frequently Asked Questions</h2>
+                    </div>
+
+                    <div className="space-y-3">
+                        <FaqItem
+                            isOpen={faqOpen === 0}
+                            onToggle={() => toggleFaq(0)}
+                            question="How do candidates join an interview session?"
+                            answer="Candidates sign in with their candidate account and enter the unique Room ID or click an invite link provided by their interviewer to access their personalized interview workspace."
+                        />
+                        <FaqItem
+                            isOpen={faqOpen === 1}
+                            onToggle={() => toggleFaq(1)}
+                            question="What programming languages are currently supported?"
+                            answer="InterviewForge supports JavaScript (Node.js ES6), Python 3.11, C++ 20, and Java 17 with instant sandboxed execution."
+                        />
+                        <FaqItem
+                            isOpen={faqOpen === 2}
+                            onToggle={() => toggleFaq(2)}
+                            question="How does the live Anti-Cheat monitoring work?"
+                            answer="The room tracks browser window focus loss, tab switching events, and large clipboard pastes. All events are streamed live to the interviewer's control panel without blocking candidate workflow."
+                        />
+                        <FaqItem
+                            isOpen={faqOpen === 3}
+                            onToggle={() => toggleFaq(3)}
+                            question="Can interviewers control candidate editor state?"
+                            answer="Yes. Interviewers have administrative privileges to lock/unlock the editor, manage session timers, clear code, and toggle chat permissions at any point."
+                        />
+                    </div>
+                </div>
+
+                {/* BOTTOM CTA BANNER */}
+                <div className="p-8 sm:p-12 rounded-2xl bg-gradient-to-r from-surface-raised via-surface to-surface-raised border border-border/80 text-center space-y-6 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-candidate/10 blur-3xl rounded-full pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-interviewer/10 blur-3xl rounded-full pointer-events-none" />
+
+                    <h2 className="text-3xl sm:text-4xl font-mono font-bold text-white tracking-tight">
+                        Ready to elevate your technical hiring process?
+                    </h2>
+                    <p className="text-dim text-sm max-w-xl mx-auto leading-relaxed">
+                        Start hosting real-time coding interviews in minutes with zero setup friction.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-4 pt-2">
+                        <Button size="lg" onClick={primary.onClick} className="shadow-xl">
+                            {primary.label}
+                        </Button>
                     </div>
                 </div>
 
@@ -130,13 +298,29 @@ export default function Landing() {
     );
 }
 
-function Feature({ icon, title, desc }) {
+function StatCard({ number, label, accent }) {
     return (
-        <Card className="p-6 bg-surface hover:bg-surface-raised/80 transition-all border border-border group">
-            <div className="h-8 w-8 rounded-lg bg-surface-raised border border-border flex items-center justify-center font-mono text-xs mb-4 text-white group-hover:border-dim/40 transition">
-                {icon}
+        <div className="p-4 rounded-xl bg-surface/60 border border-border/60 text-center space-y-1 hover:border-border transition">
+            <div className={`text-xl sm:text-2xl font-mono font-bold ${accent === "candidate" ? "text-candidate" : "text-interviewer"}`}>
+                {number}
             </div>
-            <h3 className="font-mono font-bold text-sm text-white mb-2 tracking-tight">{title}</h3>
+            <div className="text-[11px] text-dim font-mono">{label}</div>
+        </div>
+    );
+}
+
+function StepCard({ step, title, desc, tag }) {
+    return (
+        <Card className="p-6 bg-surface border border-border/80 hover:border-candidate/40 transition-all duration-300 space-y-3 group">
+            <div className="flex items-center justify-between">
+                <span className="font-mono text-2xl font-bold text-candidate/40 group-hover:text-candidate transition-colors">
+                    {step}
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-raised text-dim border border-border">
+                    {tag}
+                </span>
+            </div>
+            <h3 className="font-mono font-bold text-base text-white tracking-tight">{title}</h3>
             <p className="text-dim text-xs leading-relaxed">{desc}</p>
         </Card>
     );
@@ -159,66 +343,23 @@ function FeatureCard({ icon, title, desc, accent }) {
     );
 }
 
-
-function CodeDemo() {
+function FaqItem({ question, answer, isOpen, onToggle }) {
     return (
-        <Card className="font-mono text-xs overflow-hidden border border-border bg-surface shadow-2xl shadow-black/60 rounded-xl">
-            {/* Simulated Browser Window Chrome Header */}
-            <div className="px-4 py-2.5 bg-surface-raised border-b border-border text-dim flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 mr-2">
-                        <div className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
-                        <div className="h-2.5 w-2.5 rounded-full bg-yellow-500/80" />
-                        <div className="h-2.5 w-2.5 rounded-full bg-green-500/80" />
-                    </div>
-                    <span className="text-slate-300 font-medium">two_sum.py</span>
-                    <span className="text-[10px] text-dim/60">● Python 3.11</span>
+        <div className="border border-border/80 rounded-xl bg-surface overflow-hidden transition-colors">
+            <button
+                onClick={onToggle}
+                className="w-full px-5 py-4 text-left font-mono text-xs sm:text-sm font-semibold text-white flex items-center justify-between gap-4 cursor-pointer hover:bg-surface-raised/40 transition"
+            >
+                <span>{question}</span>
+                <span className="text-candidate font-mono text-base font-bold">
+                    {isOpen ? "−" : "+"}
+                </span>
+            </button>
+            {isOpen && (
+                <div className="px-5 pb-4 text-xs text-dim leading-relaxed font-sans animate-fade-in border-t border-border/40 pt-3">
+                    {answer}
                 </div>
-
-                <div className="flex items-center gap-2">
-                    <Badge tone="interviewer">Interviewer</Badge>
-                    <Badge tone="candidate">Candidate</Badge>
-                </div>
-            </div>
-
-            {/* Code Editor Body with Line Numbers */}
-            <div className="p-4 bg-bg leading-relaxed flex font-mono text-dim overflow-x-auto">
-                {/* Line Numbers */}
-                <div className="w-8 select-none text-dim/40 text-right pr-3 space-y-1 text-[11px]">
-                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div>
-                </div>
-
-                {/* Code Canvas */}
-                <div className="flex-1 space-y-1">
-                    <div>
-                        <span className="text-purple-400">def</span> <span className="text-candidate font-bold">twoSum</span>(nums, target):
-                    </div>
-                    <div className="pl-4">seen = {"{}"}</div>
-                    <div className="pl-4">
-                        <span className="text-purple-400">for</span> i, n <span className="text-purple-400">in</span> enumerate(nums):
-                    </div>
-                    <div className="pl-8">
-                        complement = target - n
-                        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] bg-interviewer/10 text-interviewer border border-interviewer/20">
-                            Alex (Interviewer)
-                        </span>
-                    </div>
-                    <div className="pl-8 flex items-center gap-1">
-                        <span className="text-purple-400">if</span> complement <span className="text-purple-400">in</span> seen: <span className="text-purple-400">return</span> [seen[complement], i]
-                        <span className="text-candidate blink-cursor font-bold text-sm">█</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Mock Terminal Drawer */}
-            <div className="px-4 py-2 bg-surface-raised/80 border-t border-border flex items-center justify-between text-[11px]">
-                <div className="flex items-center gap-2">
-                    <span className="text-candidate font-bold">✓ Test Suite Passed</span>
-                    <span className="text-dim">• Execution: 0.12ms</span>
-                </div>
-                <span className="text-dim text-[10px]">Memory: 14.2MB</span>
-            </div>
-        </Card>
-
+            )}
+        </div>
     );
 }
